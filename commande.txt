@@ -1,0 +1,55 @@
+# Exercice 3 - Création d’une application web Node.js
+
+# 1. Créer le dossier du projet et se déplacer dedans
+mkdir node-app
+cd node-app
+
+# 2. Initialiser npm et installer Express
+npm init -y
+npm install express
+
+# 3. Créer package.json
+# Contient les informations de base et dépendances (Express)
+
+# 4. Créer server.js avec les routes :
+# - GET / : page d’accueil
+# - GET /api/health : status de l’application
+# - GET /api/info : informations sur l’environnement
+# - GET /api/time : heure actuelle
+
+# 5. Créer .dockerignore pour exclure node_modules et logs
+echo "node_modules\nnpm-debug.log" > .dockerignore
+
+# 6. Créer Dockerfile initial
+# FROM node:18
+# WORKDIR /app
+# COPY package*.json ./
+# RUN npm install
+# COPY . .
+# EXPOSE 3000
+# CMD ["npm", "start"]
+
+# 7. Construire l’image Docker avec tag node-app:1.0
+docker build -t node-app:1.0 .
+
+# 8. Lancer le conteneur sur le port 3000
+docker run -d -p 3000:3000 --name node-app node-app:1.0
+
+# 9. Tester les routes de l’application
+curl http://localhost:3000/
+curl http://localhost:3000/api/health
+curl http://localhost:3000/api/info
+curl http://localhost:3000/api/time
+
+# 10. Optimiser le Dockerfile pour réduire la taille (ex: node:18-alpine et npm install --production)
+# Ajouter aussi un HEALTHCHECK dans le Dockerfile
+# HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD curl -f http://localhost:3000/api/health || exit 1
+
+# 11. Reconstruire l’image optimisée avec tag node-app:1.1
+docker build -t node-app:1.1 .
+
+# 12. Comparer les tailles des deux images
+docker images node-app
+
+# 13. Tester le health check
+docker inspect --format='{{json .State.Health}}' node-app
